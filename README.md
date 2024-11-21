@@ -1,0 +1,1 @@
+The command to run the needed script is: `pyhton ./script-name.py` or `python3 ./script-name.py` (some MacOS/Linux devices may need to use the python3 version)
