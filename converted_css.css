@@ -1,12 +1,7 @@
 :root {
-  --type-scale-m-label-bold-l-font-family: var(--bold-primary-font-family);
-  --type-scale-m-label-bold-l-font-weight: "bold";
-  --type-scale-m-label-bold-l-font-size: 1.0000rem;
-  --type-scale-m-label-bold-l-line-height: 1.3750;
-  --type-scale-m-label-bold-l-letter-spacing: 0.1138em;
-  --type-scale-m-label-bold-s-font-family: var(--bold-primary-font-family);
-  --type-scale-m-label-bold-s-font-weight: "bold";
-  --type-scale-m-label-bold-s-font-size: 0.8750rem;
-  --type-scale-m-label-bold-s-line-height: 1.4286;
-  --type-scale-m-label-bold-s-letter-spacing: 0.0907em;
+  --font-family: var(--primary-font-family);
+  --font-weight: 500;
+  --font-size: 0.6250rem;
+  --line-height: 1.0000;
+  --letter-spacing: 0.0000em;
 }

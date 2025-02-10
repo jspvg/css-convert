@@ -1,15 +1,21 @@
-css_values = """
---type-scale-m-label-bold-l-font-family: var(--primary-font-family);
---type-scale-m-label-bold-l-font-weight: "bold";
---type-scale-m-label-bold-l-font-size: 16;
---type-scale-m-label-bold-l-line-height: 22;
---type-scale-m-label-bold-l-letter-spacing: 1.8200000524520874;
---type-scale-m-label-bold-s-font-family: var(--primary-font-family);
---type-scale-m-label-bold-s-font-weight: "bold";
---type-scale-m-label-bold-s-font-size: 14;
---type-scale-m-label-bold-s-line-height: 20;
---type-scale-m-label-bold-s-letter-spacing: 1.2699999809265137;
-"""
+import re
+
+# File paths
+input_file = "input.css"
+output_file = "converted_css.css"
+
+# Read the input file
+with open(input_file, "r") as file:
+    css_content = file.read()
+
+
+# Extract content inside :root { ... }
+root_match = re.search(r":root\s*{([\s\S]*?)}", css_content)
+if not root_match:
+    print("Error: No :root { ... } block found in input.css.")
+    exit(1)
+
+css_values = root_match.group(1)  # Extract the inside content
 
 
 def convert_to_rem(px_value, base=16):
@@ -21,48 +27,68 @@ def convert_to_em(px_value, font_size):
 
 
 def convert_to_unitless(line_height_px, font_size_px):
-    return f"{line_height_px / font_size_px:.4f}"  # Remove '%' from the format
+    return f"{line_height_px / font_size_px:.4f}"
 
 
-properties = css_values.strip().split(';')
+def convert_font_weight(value):
+    font_weight_map = {
+        "thin": 100,
+        "extralight": 200,
+        "ultralight": 200,
+        "light": 300,
+        "book": 350,
+        "normal": 400,
+        "regular": 400,
+        "medium": 500,
+        "demi": 600,
+        "semibold": 600,
+        "bold": 700,
+        "extrabold": 800,
+        "ultrabold": 800,
+        "black": 900,
+        "heavy": 900
+    }
+    cleaned_value = value.lower().strip('\"').strip()
+    return str(font_weight_map.get(cleaned_value, value))
+
+
+# Extract CSS properties as key-value pairs
+properties = re.findall(r'(--[\w-]+):\s*([^;]+);', css_values)
 font_sizes = {}
 grouped_css = {}
 
 # First, collect all font sizes
-for prop in properties:
-    if prop.strip():
-        key, value = prop.split(':')
-        key = key.strip()
-        value = value.strip().replace('px', '')
+for key, value in properties:
+    value = value.strip().replace('px', '')
 
-        if 'font-size' in key:
-            font_size_px = float(value)
-            font_sizes[key] = font_size_px
-            grouped_css[key] = convert_to_rem(font_size_px)
+    if 'font-size' in key:
+        font_size_px = float(value)
+        font_sizes[key] = font_size_px
+        grouped_css[key] = convert_to_rem(font_size_px)
 
 # Then process all properties
-for prop in properties:
-    if prop.strip():
-        key, value = prop.split(':')
-        key = key.strip()
-        value = value.strip().replace('px', '')
+for key, value in properties:
+    value = value.strip().replace('px', '')
 
-        if 'line-height' in key:
-            line_height_px = float(value)
-            base_name = "-".join(key.split('-')[:-2]) + "-font-size"
-            font_size_px = font_sizes.get(base_name)
-            if font_size_px:
-                grouped_css[key] = convert_to_unitless(line_height_px, font_size_px)
+    if 'line-height' in key:
+        line_height_px = float(value)
+        base_name = "-".join(key.split('-')[:-2]) + "-font-size"
+        font_size_px = font_sizes.get(base_name)
+        if font_size_px:
+            grouped_css[key] = convert_to_unitless(line_height_px, font_size_px)
 
-        elif 'letter-spacing' in key:
-            letter_spacing_px = float(value)
-            base_name = "-".join(key.split('-')[:-2]) + "-font-size"
-            font_size_px = font_sizes.get(base_name)
-            if font_size_px:
-                grouped_css[key] = convert_to_em(letter_spacing_px, font_size_px)
+    elif 'letter-spacing' in key:
+        letter_spacing_px = float(value)
+        base_name = "-".join(key.split('-')[:-2]) + "-font-size"
+        font_size_px = font_sizes.get(base_name)
+        if font_size_px:
+            grouped_css[key] = convert_to_em(letter_spacing_px, font_size_px)
 
-        elif 'font-family' in key or 'font-weight' in key:
-            grouped_css[key] = value  # Preserve these properties as-is
+    elif 'font-weight' in key:
+        grouped_css[key] = convert_font_weight(value)
+
+    elif 'font-family' in key:
+        grouped_css[key] = value  # Preserve these properties as-is
 
 output = ":root {\n"
 
@@ -86,7 +112,8 @@ for key in grouped_css.keys():
 
 output += "}\n"
 
-with open("converted_css.css", "w") as file:
+# Write the converted CSS to a file
+with open(output_file, "w") as file:
     file.write(output)
 
-print("Converted CSS written to converted_css.css")
+print(f"Converted CSS written to {output_file}")

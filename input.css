@@ -1,0 +1,7 @@
+:root {
+    --font-family: var(--primary-font-family);
+    --font-weight: "medium";
+    --font-size: 10;
+    --line-height: 10;
+    --letter-spacing: 0;
+}

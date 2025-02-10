@@ -1,0 +1,7 @@
+:root {
+  --font-family: var(--primary-font-family);
+  --font-weight: 500;
+  --font-size: 0.625rem;
+  --line-height: 1;
+  --letter-spacing: 0em;
+}
