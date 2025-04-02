@@ -32,21 +32,14 @@ def convert_to_unitless(line_height_px, font_size_px):
 
 def convert_font_weight(value):
     font_weight_map = {
-        "thin": 100,
-        "extralight": 200,
-        "ultralight": 200,
         "light": 300,
-        "book": 350,
-        "normal": 400,
+        "book": 400,
         "regular": 400,
-        "medium": 500,
-        "demi": 600,
-        "semibold": 600,
+        "medium": 450,
+        "demi": 500,
+        "heavy": 600,
         "bold": 700,
-        "extrabold": 800,
-        "ultrabold": 800,
-        "black": 900,
-        "heavy": 900
+        "extra bold": 800
     }
     cleaned_value = value.lower().strip('\"').strip()
     return str(font_weight_map.get(cleaned_value, value))
