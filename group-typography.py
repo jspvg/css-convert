@@ -180,6 +180,26 @@ def build_clamp(min_value, max_value, min_px, max_px, root_font_size, unit):
     )
 
 
+def convert_line_height_points(font_size_points, line_height_points):
+    line_height_units = {unit for _, _, unit in line_height_points}
+    if len(line_height_units) != 1:
+        return None
+
+    line_height_unit = next(iter(line_height_units))
+    if line_height_unit:
+        return line_height_points
+
+    font_size_units = {unit for _, _, unit in font_size_points}
+    if len(font_size_units) != 1:
+        return None
+
+    font_size_unit = next(iter(font_size_units))
+    converted_points = []
+    for (width, font_size, _), (_, line_height, _) in zip(font_size_points, line_height_points):
+        converted_points.append((width, font_size * line_height, font_size_unit))
+    return converted_points
+
+
 def build_groups(declarations, viewports):
     groups = OrderedDict()
     unmatched = []
@@ -239,14 +259,20 @@ def build_merged_token(token, group, viewports, root_font_size):
         line_height_points.append((viewports[viewport], *line_height_value))
 
     font_size_units = {unit for _, _, unit in font_size_points}
-    line_height_units = {unit for _, _, unit in line_height_points}
-    if len(font_size_units) != 1 or len(line_height_units) != 1:
+    if len(font_size_units) != 1:
         return None
 
-    min_font_size = min(font_size_points, key=lambda item: item[1])
-    max_font_size = max(font_size_points, key=lambda item: item[1])
-    min_line_height = min(line_height_points, key=lambda item: item[1])
-    max_line_height = max(line_height_points, key=lambda item: item[1])
+    rendered_line_height_points = convert_line_height_points(
+        font_size_points,
+        line_height_points,
+    )
+    if rendered_line_height_points is None:
+        return None
+
+    min_font_size = font_size_points[0]
+    max_font_size = font_size_points[-1]
+    min_line_height = rendered_line_height_points[0]
+    max_line_height = rendered_line_height_points[-1]
 
     merged = OrderedDict()
     merged["font-family"] = next(iter(font_family_values))
